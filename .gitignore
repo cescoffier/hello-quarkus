@@ -15,3 +15,10 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+.idea/
+.vscode/
+
+# Specific files to NOT include
+.env
+secret.yaml

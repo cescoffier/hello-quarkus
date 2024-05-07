@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+
+
+    <meta charset="utf-8">
+    <meta name="description" content="My description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Movie Database</title>
+
+    <style>
+        .right {
+            padding-top: 0;
+            margin-top: 0;
+            vertical-align: top;
+        }
+        table {
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>My Movie Database</h1>
+    <p>Store my <mark>favorite</mark> movies.</p>
+</header>
+<main>
+    <hr>
+    <section id="movies">
+        <header>
+            <h2>My Movies</h2>
+        </header>
+    </section>
+</main>
+</body>
+
+<script>
+    window.onload = function () {
+        retrieveMovies();
+        listenForUpdates();
+    };
+
+    function listenForUpdates() {
+        let eventSource = new EventSource("/movies/stream");
+        eventSource.onmessage = function (event) {
+            retrieveMovies();
+        };
+    }
+
+    function retrieveMovies() {
+        return fetch('/movies')
+            .then(response => response.json())
+            .then(data => {
+                document.querySelectorAll("#movies aside").forEach(el => el.remove());
+                data.forEach(
+                    movie => {
+                        let element = document.createElement("aside");
+                        let table = document.createElement("table");
+                        let row = document.createElement("tr");
+                        let left = document.createElement("td");
+                        let right = document.createElement("td");
+                        let img = document.createElement("img");
+                        let title = document.createElement("h3");
+                        let year = document.createElement("p");
+                        let ranking = document.createElement("p");
+                        right.setAttribute("class", "right");
+                        title.appendChild(document.createTextNode(movie.title));
+                        ranking.appendChild(document.createTextNode("Rating: " + movie.rating));
+                        year.appendChild(document.createTextNode("Year: " + movie.year));
+                        img.setAttribute("src", movie.cover);
+                        right.appendChild(title);
+                        right.appendChild(ranking);
+                        right.append(year);
+                        row.appendChild(left);
+                        row.appendChild(right);
+                        left.appendChild(img);
+                        table.appendChild(row);
+                        element.appendChild(table)
+                        document.getElementById("movies").appendChild(element);
+                    }
+                )
+            });
+    }
+
+</script>
+
+</html>

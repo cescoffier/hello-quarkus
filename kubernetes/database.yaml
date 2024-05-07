@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movies-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: movies-db
+  template:
+    metadata:
+      labels:
+        name: movies-db
+    spec:
+      containers:
+        - envFrom:
+            - secretRef:
+                name: movies-db-config
+          image: bitnami/postgresql:14
+          name: movies-db
+          ports:
+            - containerPort: 5432
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              memory: 32Mi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app: movies-db
+  name: movies-db-config
+data:
+  POSTGRESQL_DATABASE: bW92aWVz
+  POSTGRESQL_USERNAME: bW92aWVz
+  POSTGRESQL_PASSWORD: bW92aWVz
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: movies-db
+    application: movies-service
+  name: movies-db
+spec:
+  ports:
+    - port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    name: movies-db
+  type: ClusterIP

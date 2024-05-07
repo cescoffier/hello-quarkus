@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka
+  name: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: kafka
+  template:
+    metadata:
+      labels:
+        name: kafka
+    spec:
+      containers:
+        - command:
+            - sh
+            - -c
+            - "export CLUSTER_ID=$(bin/kafka-storage.sh random-uuid) && bin/kafka-storage.sh\
+              \ format -t ${CLUSTER_ID} -c config/kraft/server.properties && bin/kafka-server-start.sh\
+              \ config/kraft/server.properties --override advertised.listeners=${KAFKA_ADVERTISED_LISTENERS}"
+          env:
+            - name: LOG_DIR
+              value: /tmp/logs
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: PLAINTEXT://kafka:9092
+          image: quay.io/strimzi/kafka:0.34.0-kafka-3.4.0
+          name: kafka
+          ports:
+            - containerPort: 9092
+          resources:
+            limits:
+              memory: 768Mi
+            requests:
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: kafka
+  name: kafka
+spec:
+  ports:
+    - port: 9092
+      protocol: TCP
+      targetPort: 9092
+  selector:
+    name: kafka
+  type: ClusterIP

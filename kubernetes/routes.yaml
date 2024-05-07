@@ -1,0 +1,43 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: movie-stream
+  labels:
+    app.kubernetes.io/managed-by: quarkus
+    app.kubernetes.io/name: movie-stream
+    app.kubernetes.io/version: 1.0-SNAPSHOT
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  to:
+    kind: Service
+    name: movie-stream
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: movie-rater
+  labels:
+    app.kubernetes.io/managed-by: quarkus
+    app.kubernetes.io/name: movie-rater
+    app.kubernetes.io/version: 1.0-SNAPSHOT
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  to:
+    kind: Service
+    name: movie-rater
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
