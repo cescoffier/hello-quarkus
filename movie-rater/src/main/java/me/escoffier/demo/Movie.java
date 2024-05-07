@@ -3,10 +3,11 @@ package me.escoffier.demo;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
 
-@Entity
-public class Movie extends PanacheEntity {
+// Movie:
+// Entity - Panache Entity
+// title and rating
 
-    public String title;
-    public int rating;
+public class Movie  {
 
+    
 }
