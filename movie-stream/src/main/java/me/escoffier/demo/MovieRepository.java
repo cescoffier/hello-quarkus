@@ -32,12 +32,7 @@ public class MovieRepository {
         Log.infof("Received movie %s", movie.title());
 
         // Enrich, Store (title -> enriched) and send to updates if there is requests
-        Movie enriched = enrich(movie);
-        movies.put(movie.title(), enriched);
 
-        if(updates.hasRequests()) {
-            updates.sendAndForget(enriched);
-        }
     }
 
     private Movie enrich(Movie movie) {

@@ -71,7 +71,6 @@ class MovieControllerTest {
                 .then()
                 .statusCode(200)
                 .extract().body().as(LIST_OF_MOVIES).size());
-
     }
 
 

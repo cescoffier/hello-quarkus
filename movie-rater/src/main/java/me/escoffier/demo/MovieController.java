@@ -17,34 +17,5 @@ import java.util.List;
 @RunOnVirtualThread
 public class MovieController {
 
-    @Channel("movies")
-    MutinyEmitter<Movie> emitter;
-
-    @GetMapping("/movies")
-    public List<Movie> getAll() {
-        return Movie.listAll();
-    }
-
-    @PostMapping("/movies")
-    @Transactional
-    public Movie addMovie(Movie movie) {
-        Log.infof("Adding a movie: %s (rating: %d)", movie.title, movie.rating);
-        movie.persist();
-        emitter.sendAndAwait(movie);
-        return movie;
-    }
-
-    @DeleteMapping("/movies/{id}")
-    @Transactional
-    public Response deleteMovie(Long id) {
-        Log.infof("Deleting a movie with id: %d", id);
-        Movie movie = Movie.findById(id);
-        if (movie != null) {
-            movie.delete();
-            return Response.noContent().build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-    }
 
 }
