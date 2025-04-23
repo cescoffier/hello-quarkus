@@ -1,3 +1,6 @@
+## Container image dependencies
+postgres := "postgres:15-bullseye"
+kafka := "quay.io/ogunalp/kafka-native:0.8.0-kafka-3.7.0"
 
 # Start the database
 start-infra:
@@ -5,14 +8,16 @@ start-infra:
         -e POSTGRES_USER=movies \
         -e POSTGRES_PASSWORD=movies \
         -e POSTGRES_DB=movies \
-        -p 5432:5432 postgres:15-bullseye
+        -p 5432:5432 {{postgres}}
 
     podman run -d -p 9092:9092 -it --rm \
         -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
-        quay.io/ogunalp/kafka-native:0.8.0-kafka-3.7.0
+        {{kafka}}
 
 stop-infra:
-    podman stop $(podman ps -q)
+    # List explicitly to limit blast radius (e.g. other containers running)
+    podman stop $(podman ps -q --filter ancestor={{postgres}})
+    podman stop $(podman ps -q --filter ancestor={{kafka}})
 
 build-images:
     cd movie-rater && quarkus build --clean -Dquarkus.container-image.push=true -DskipTests -Dquarkus.profile=kubernetes
