@@ -20,28 +20,54 @@
         table {
             border: none;
         }
+        #recommendation {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
 <header>
     <h1>My Movie Database</h1>
-    <p>Store my <mark>favorite</mark> movies.</p>
 </header>
 <main>
     <hr>
     <section id="movies">
         <header>
-            <h2>My Movies</h2>
+            <h2>My Movie Ratings</h2>
         </header>
+    </section>
+
+    <hr>
+    <section>
+        <button id="recommendation-button">Pick something for me</button>
+
+        <aside id="recommendation">
+            What about <strong id="recommendation-title"></strong>?
+        </aside>
     </section>
 </main>
 </body>
 
 <script>
+    function setupRecommendationButton() {
+        document.getElementById("recommendation-button")
+            .onclick = function () {
+                fetch('/movies/recommendation')
+                    .then(response => response.json())
+                    .then(data => {
+                        let recommendation = document.querySelector("#recommendation");
+                        let title = document.querySelector("#recommendation-title");
+                        recommendation.style.display = "block";
+                        title.innerText = data.title;
+                    });
+            };
+    }
+
     window.onload = function () {
         retrieveMovies();
         listenForUpdates();
+        setupRecommendationButton();
     };
 
     function listenForUpdates() {

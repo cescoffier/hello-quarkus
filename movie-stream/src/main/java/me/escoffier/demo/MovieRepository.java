@@ -4,6 +4,7 @@ import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -31,7 +32,12 @@ public class MovieRepository {
     void consume(Movie movie) {
         Log.infof("Received movie %s", movie.title());
 
-        // Enrich, Store (title -> enriched) and send to updates if there is requests
+        movie = enrich(movie);
+        movies.put(movie.title(), movie);
+
+        if (updates.hasRequests()) {
+            updates.sendAndAwait(movie);
+        }
 
     }
 
@@ -48,6 +54,12 @@ public class MovieRepository {
 
     public List<Movie> getAll() {
         return movies.values().stream().toList();
+    }
+
+    @Inject MovieRecommendationAgent ai;
+
+    public String recommend() {
+        return ai.recommend(getAll());
     }
 
 }

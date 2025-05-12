@@ -18,8 +18,9 @@ public interface TheMovieDatabase {
 
     @GET
     @Path("/search/movie")
-    @Retry(maxRetries = 4, delay = 1, delayUnit = ChronoUnit.SECONDS)
-    @Timeout(1000)
+    // Fault Tolerance
+    @Timeout(value = 5, unit = ChronoUnit.SECONDS)
+    @Retry(maxRetries = 3, delay = 1000)
     TmdbResponse search(@QueryParam("api_key") String key, @QueryParam("query") String title);
 
 
