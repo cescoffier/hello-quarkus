@@ -16,19 +16,20 @@ import java.util.List;
 @RunOnVirtualThread
 public class MovieController {
 
+    @Channel("movies")
+    MutinyEmitter<Movie> emitter;
+
     @GetMapping("/movies")
-    public List<Movie> getAll() {
+    public List<Movie> getMovies() {
+        Log.info("Getting movies");
         return Movie.listAll();
     }
 
 
-    @Channel("movies")
-    MutinyEmitter<Movie> emitter;
-
     @PostMapping("/movies")
     @Transactional
     public Movie addMovie(Movie movie) {
-        Log.infof("Received movie %s", movie.title);
+        Log.info("Adding movie: " + movie.title);
         movie.persist();
         emitter.sendAndAwait(movie);
         return movie;
@@ -37,10 +38,7 @@ public class MovieController {
     @DeleteMapping("/movies/{id}")
     @Transactional
     public void deleteMovie(Long id) {
-        Movie movie = Movie.findById(id);
-        if (movie != null) {
-            movie.delete();
-        }
+        Log.info("Deleting movie with id: " + id);
+        Movie.deleteById(id);
     }
-
 }

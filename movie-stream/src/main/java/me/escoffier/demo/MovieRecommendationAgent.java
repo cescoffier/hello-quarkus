@@ -3,27 +3,24 @@ package me.escoffier.demo;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
+import io.quarkiverse.langchain4j.ToolBox;
 
-import java.util.List;
 
 @RegisterAiService
 public interface MovieRecommendationAgent {
 
-
     @SystemMessage("""
-            Your goal is to provide a recommendation for a movie.
-            You will be given a list of movies and the user's rating for each movie.
-            You will then provide a recommendation based on the user's preferences.
-            Only provide the movie title.
-            Do not recommend a movie that the user has already rated.
+            You are a movie recommendation assistant.
+            You MUST use the provided tool to retrieve the list of movies rated by the user.
+            From that list, pick the movie whose genre and theme best match the requested mood.
+            The mood match is the MOST important criterion. The user's rating is secondary.
+            Do NOT always pick the highest-rated movie. Prefer a lower-rated movie if it is a better mood match.
+            You MUST vary your recommendations - do not always pick the same movie.
             """)
     @UserMessage("""
-            Here is the list of movies and the user's ratings:
-            
-            {#for rating in ratings}
-            - {rating.title}: {rating.rating}
-            {/for}
-            
+            The user is in a {mood} mood. Pick the best matching movie from their rated list.
+            Think about what genre and themes fit a {mood} mood, then select accordingly.
             """)
-    String recommend(List<Movie> ratings);
+    @ToolBox(MovieRepository.class)
+    Movie recommend(String mood);
 }

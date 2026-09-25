@@ -2,66 +2,389 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/mvp.css">
-
-
     <meta charset="utf-8">
-    <meta name="description" content="My description">
+    <meta name="description" content="My Movie Database">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>My Movie Database</title>
 
     <style>
-        .right {
-            padding-top: 0;
-            margin-top: 0;
-            vertical-align: top;
+        /* ── IBM Carbon Design System tokens ── */
+        :root {
+            --ibm-blue-60:  #0f62fe;
+            --ibm-blue-70:  #0043ce;
+            --ibm-gray-10:  #f4f4f4;
+            --ibm-gray-20:  #e0e0e0;
+            --ibm-gray-30:  #c6c6c6;
+            --ibm-gray-50:  #8d8d8d;
+            --ibm-gray-70:  #525252;
+            --ibm-gray-90:  #262626;
+            --ibm-gray-100: #161616;
+            --ibm-white:    #ffffff;
+            --ibm-green-40: #42be65;
+            --ibm-red-60:   #da1e28;
+            --ibm-yellow-30:#f1c21b;
+
+            --font: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+            --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
         }
-        table {
+
+        /* ── Reset ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--ibm-gray-100);
+            background: var(--ibm-gray-10);
+            min-height: 100vh;
+        }
+
+        /* ── Shell header ── */
+        .bx--header {
+            display: flex;
+            align-items: center;
+            height: 48px;
+            background: var(--ibm-gray-100);
+            padding: 0 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--ibm-gray-70);
+        }
+        .bx--header__name {
+            color: var(--ibm-white);
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.1px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .bx--header__name strong { font-weight: 600; }
+
+        /* ── Page content ── */
+        .bx--content {
+            max-width: 1056px;
+            margin: 0 auto;
+            padding: 2rem 1rem 4rem;
+        }
+
+        /* ── Page header ── */
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--ibm-gray-20);
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: var(--ibm-gray-100);
+            line-height: 1.25;
+        }
+
+        /* ── Section titles ── */
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ibm-gray-100);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Movie grid ── */
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1px;
+            background: var(--ibm-gray-20);
+            border: 1px solid var(--ibm-gray-20);
+            margin-bottom: 2rem;
+        }
+        .movie-card {
+            background: var(--ibm-white);
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            transition: background 70ms ease;
+        }
+        .movie-card:hover { background: var(--ibm-gray-10); }
+        .movie-card img {
+            width: 64px;
+            min-width: 64px;
+            height: 96px;
+            object-fit: cover;
+            background: var(--ibm-gray-20);
+            display: block;
+        }
+        .movie-card__body { flex: 1; overflow: hidden; }
+        .movie-card__title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--ibm-gray-100);
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .movie-card__meta {
+            font-size: 0.8125rem;
+            color: var(--ibm-gray-70);
+            margin-bottom: 0.5rem;
+        }
+        .movie-card__stars { display: flex; gap: 2px; }
+        .star { width: 14px; height: 14px; fill: var(--ibm-gray-30); }
+        .star.on { fill: var(--ibm-yellow-30); }
+
+        #movies-empty {
+            background: var(--ibm-white);
+            border: 1px solid var(--ibm-gray-20);
+            padding: 2rem;
+            text-align: center;
+            color: var(--ibm-gray-50);
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Divider ── */
+        .bx--divider {
             border: none;
+            border-top: 1px solid var(--ibm-gray-20);
+            margin: 2rem 0;
         }
-        #recommendation {
+
+        /* ── Recommendation section ── */
+        .mood-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .bx--form-item { display: flex; flex-direction: column; gap: 0.25rem; }
+        .bx--label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--ibm-gray-70);
+            text-transform: uppercase;
+            letter-spacing: 0.32px;
+        }
+        .bx--select {
+            height: 40px;
+            padding: 0 2.5rem 0 1rem;
+            font-family: var(--font);
+            font-size: 0.875rem;
+            color: var(--ibm-gray-100);
+            background: var(--ibm-white);
+            border: 1px solid var(--ibm-gray-50);
+            border-bottom-color: var(--ibm-gray-100);
+            border-radius: 0;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23161616' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            cursor: pointer;
+            min-width: 200px;
+        }
+        .bx--select:focus {
+            outline: 2px solid var(--ibm-blue-60);
+            outline-offset: -2px;
+        }
+        .bx--btn {
+            display: inline-flex;
+            align-items: center;
+            height: 40px;
+            padding: 0 1rem;
+            font-family: var(--font);
+            font-size: 0.875rem;
+            font-weight: 400;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background 70ms ease;
+            white-space: nowrap;
+        }
+        .bx--btn--primary {
+            background: var(--ibm-blue-60);
+            color: var(--ibm-white);
+        }
+        .bx--btn--primary:hover { background: var(--ibm-blue-70); }
+        .bx--btn--primary:disabled {
+            background: var(--ibm-gray-30);
+            color: var(--ibm-gray-50);
+            cursor: not-allowed;
+        }
+        .bx--btn--primary:focus {
+            outline: 2px solid var(--ibm-blue-60);
+            outline-offset: 2px;
+        }
+
+        /* ── Inline notification ── */
+        .bx--inline-notification {
             display: none;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            background: #edf5ff;
+            border-left: 3px solid var(--ibm-blue-60);
+            max-width: 640px;
         }
+        .bx--inline-notification.visible { display: flex; }
+        .bx--inline-notification.loading {
+            background: var(--ibm-gray-10);
+            border-left-color: var(--ibm-gray-50);
+            color: var(--ibm-gray-70);
+            font-style: italic;
+        }
+        .bx--inline-notification__text { font-size: 0.875rem; line-height: 1.5; }
     </style>
 </head>
 
 <body>
-<header>
-    <h1>My Movie Database</h1>
+
+<header class="bx--header">
+    <a class="bx--header__name" href="#">
+        <strong>IBM</strong>&nbsp;| My Movie Database
+    </a>
 </header>
-<main>
-    <hr>
-    <section id="movies">
-        <header>
-            <h2>My Movie Ratings</h2>
-        </header>
-    </section>
 
-    <hr>
+<div class="bx--content">
+
+    <div class="page-header">
+        <h1>My Movie Database</h1>
+    </div>
+
     <section>
-        <button id="recommendation-button">Pick something for me</button>
-
-        <aside id="recommendation">
-            What about <strong id="recommendation-title"></strong>?
-        </aside>
+        <p class="section-title">My Movie Ratings</p>
+        <div id="movies-empty">No movies yet. Add some from the movie-rater service.</div>
+        <div class="movie-grid" id="movies" style="display:none;"></div>
     </section>
-</main>
-</body>
+
+    <hr class="bx--divider">
+
+    <section>
+        <p class="section-title">What should I watch?</p>
+        <div class="mood-row">
+            <div class="bx--form-item">
+                <label class="bx--label" for="mood-select">Current mood</label>
+                <select class="bx--select" id="mood-select">
+                    <option value="happy">😊 Happy</option>
+                    <option value="romantic">❤️ Romantic</option>
+                    <option value="adventurous">🧭 Adventurous</option>
+                    <option value="thrilling">😱 Thrilling</option>
+                    <option value="thoughtful">🤔 Thoughtful</option>
+                    <option value="sad">😢 Sad</option>
+                    <option value="funny">😂 Funny</option>
+                </select>
+            </div>
+            <button class="bx--btn bx--btn--primary" id="recommendation-button">Pick something for me</button>
+        </div>
+
+        <div class="bx--inline-notification" id="recommendation">
+            <span class="bx--inline-notification__text" id="recommendation-text"></span>
+        </div>
+    </section>
+
+</div>
 
 <script>
+    // ── Star SVG helper ──────────────────────────────────────────────────────
+    function starSvg(filled) {
+        const cls = filled ? 'star on' : 'star';
+        return `<svg class="${cls}" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 1l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 10.8l-3.8 2 .7-4.3L1.8 5.5l4.3-.6z"/>
+        </svg>`;
+    }
+
+    // ── Recommendation button ────────────────────────────────────────────────
     function setupRecommendationButton() {
-        document.getElementById("recommendation-button")
-            .onclick = function () {
-                fetch('/movies/recommendation')
-                    .then(response => response.json())
-                    .then(data => {
-                        let recommendation = document.querySelector("#recommendation");
-                        let title = document.querySelector("#recommendation-title");
-                        recommendation.style.display = "block";
-                        title.innerText = data.title;
-                    });
-            };
+        const button = document.getElementById("recommendation-button");
+        const notification = document.getElementById("recommendation");
+        const text = document.getElementById("recommendation-text");
+
+        button.onclick = function () {
+            notification.className = "bx--inline-notification visible loading";
+            text.textContent = "Thinking…";
+            button.disabled = true;
+
+            const mood = document.getElementById("mood-select").value;
+            fetch('/movies/recommendation?mood=' + encodeURIComponent(mood))
+                .then(r => r.json())
+                .then(data => {
+                    console.log("Recommendation:", data);
+                    notification.className = "bx--inline-notification visible";
+                    text.innerHTML = '🎬 What about <strong>' + data.title + '</strong>?';
+                    button.disabled = false;
+                })
+                .catch(() => {
+                    notification.className = "bx--inline-notification visible";
+                    text.textContent = 'Something went wrong. Try again.';
+                    button.disabled = false;
+                });
+        };
+    }
+
+    // ── Movie list rendering ─────────────────────────────────────────────────
+    function renderMovies(data) {
+        const grid  = document.getElementById("movies");
+        const empty = document.getElementById("movies-empty");
+
+        grid.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            grid.style.display = "none";
+            empty.style.display = "block";
+            return;
+        }
+
+        empty.style.display = "none";
+        grid.style.display  = "grid";
+
+        data.forEach(movie => {
+            const card = document.createElement("div");
+            card.className = "movie-card";
+
+            const img = document.createElement("img");
+            img.src = movie.cover || "";
+            img.alt = movie.title;
+
+            const body = document.createElement("div");
+            body.className = "movie-card__body";
+
+            const title = document.createElement("div");
+            title.className = "movie-card__title";
+            title.textContent = movie.title;
+
+            const meta = document.createElement("div");
+            meta.className = "movie-card__meta";
+            meta.textContent = movie.year || "";
+
+            const stars = document.createElement("div");
+            stars.className = "movie-card__stars";
+            for (let i = 1; i <= 5; i++) {
+                stars.innerHTML += starSvg(i <= movie.rating);
+            }
+
+            body.appendChild(title);
+            body.appendChild(meta);
+            body.appendChild(stars);
+            card.appendChild(img);
+            card.appendChild(body);
+            grid.appendChild(card);
+        });
+    }
+
+    function retrieveMovies() {
+        return fetch('/movies')
+            .then(r => r.json())
+            .then(renderMovies);
+    }
+
+    function listenForUpdates() {
+        const es = new EventSource("/movies/stream");
+        es.onmessage = () => retrieveMovies();
     }
 
     window.onload = function () {
@@ -69,49 +392,7 @@
         listenForUpdates();
         setupRecommendationButton();
     };
-
-    function listenForUpdates() {
-        let eventSource = new EventSource("/movies/stream");
-        eventSource.onmessage = function (event) {
-            retrieveMovies();
-        };
-    }
-
-    function retrieveMovies() {
-        return fetch('/movies')
-            .then(response => response.json())
-            .then(data => {
-                document.querySelectorAll("#movies aside").forEach(el => el.remove());
-                data.forEach(
-                    movie => {
-                        let element = document.createElement("aside");
-                        let table = document.createElement("table");
-                        let row = document.createElement("tr");
-                        let left = document.createElement("td");
-                        let right = document.createElement("td");
-                        let img = document.createElement("img");
-                        let title = document.createElement("h3");
-                        let year = document.createElement("p");
-                        let ranking = document.createElement("p");
-                        right.setAttribute("class", "right");
-                        title.appendChild(document.createTextNode(movie.title));
-                        ranking.appendChild(document.createTextNode("Rating: " + movie.rating));
-                        year.appendChild(document.createTextNode("Year: " + movie.year));
-                        img.setAttribute("src", movie.cover);
-                        right.appendChild(title);
-                        right.appendChild(ranking);
-                        right.append(year);
-                        row.appendChild(left);
-                        row.appendChild(right);
-                        left.appendChild(img);
-                        table.appendChild(row);
-                        element.appendChild(table)
-                        document.getElementById("movies").appendChild(element);
-                    }
-                )
-            });
-    }
-
 </script>
 
+</body>
 </html>

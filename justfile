@@ -31,11 +31,14 @@ deploy-to-kube: kube-prerequisites
 
 add-movies host:
     curl -X POST -H "Content-Type: application/json" -d '{"title":"The Shawshank Redemption","rating":4}' {{host}}/movies
+    curl -X POST -H "Content-Type: application/json" -d '{"title":"The Odyssey","rating":3}' {{host}}/movies
     curl -X POST -H "Content-Type: application/json" -d '{"title":"The Godfather", "rating": 4}' {{host}}/movies
-    curl -X POST -H "Content-Type: application/json" -d '{"title":"The Dark Knight", "rating: 3}' {{host}}/movies
+    curl -X POST -H "Content-Type: application/json" -d '{"title":"The Dark Knight", "rating": 3}' {{host}}/movies
     curl -X POST -H "Content-Type: application/json" -d '{"title":"The Lord of the Rings: The Return of the King", "rating": 4}' {{host}}/movies
     curl -X POST -H "Content-Type: application/json" -d '{"title":"Pulp Fiction", "rating": 3}' {{host}}/movies
     curl -X POST -H "Content-Type: application/json" -d '{"title":"Inception", "rating": 5}' {{host}}/movies
+    curl -X POST -H "Content-Type: application/json" -d '{"title":"War of the Worlds", "rating": 2}' {{host}}/movies
+    curl -X POST -H "Content-Type: application/json" -d '{"title":"Forrest Gump", "rating": 5}' {{host}}/movies
 
 
 

@@ -1,5 +1,6 @@
 package me.escoffier.demo;
 
+import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import io.smallrye.reactive.messaging.MutinyEmitter;
@@ -43,6 +44,7 @@ public class MovieRepository {
 
     private Movie enrich(Movie movie) {
         var resp = service.search(key, movie.title());
+        //test
         for (var result : resp.results) {
             if (result.title.equalsIgnoreCase(movie.title())) {
                 return new Movie(result.title, result.release.getYear(), movie.rating(),
@@ -52,14 +54,15 @@ public class MovieRepository {
         return movie;
     }
 
+    @Tool("Retrieve all movies rated by the user. Each movie has a title, year, rating (1-5), and cover image URL.")
     public List<Movie> getAll() {
         return movies.values().stream().toList();
     }
 
     @Inject MovieRecommendationAgent ai;
 
-    public String recommend() {
-        return ai.recommend(getAll());
+    public Movie recommend(String mood) {
+        return ai.recommend(mood);
     }
 
 }
