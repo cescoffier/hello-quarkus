@@ -22,3 +22,6 @@ buildNumber.properties
 # Specific files to NOT include
 .env
 secret.yaml
+
+.settings/
+*/misc/Dump.txt
